@@ -1,0 +1,21 @@
+<form method="post" enctype="multipart/form-data">
+
+    {% csrf_token %}
+    
+    {{ form.as_p }}
+
+    <input type="file" id="images" name="images" multiple accept="image/*"/>
+
+    <div class="text-danger">
+
+        {% for error in errors %}
+            {{ error }} <br>
+        {% endfor %}
+
+    </div>
+    <p>jpg, jpeg, png : فرمت های مجاز</p>
+    <br>
+
+    <button type="submit">ثبت آگهی</button>
+
+</form>

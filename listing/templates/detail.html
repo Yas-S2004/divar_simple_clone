@@ -1,0 +1,18 @@
+<html lang="fa" dir="rtl">
+
+
+{% for image in images %}
+
+    <img src="{{ image.image.url }}" width="200px" height="200px"/>
+
+{% endfor %}
+
+<hr><br>
+
+    {{ listing.title }}
+    <br><br>
+    {{ listing.description }}
+
+</html>
+
+

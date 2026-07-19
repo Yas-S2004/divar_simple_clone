@@ -2,7 +2,7 @@
 
     <li>
 
-        {{listing.title}}
+        <a href="{% url 'listing:detail_page' listing.id %}">{{listing.title}}</a>
 
     </li>
     
