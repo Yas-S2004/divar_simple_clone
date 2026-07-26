@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'listing.apps.ListingConfig',
+    'account.apps.AccountConfig',
 ]
 
 MIDDLEWARE = [
@@ -70,6 +71,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'divar.wsgi.application'
 
+AUTH_USER_MODEL = "account.User"
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases

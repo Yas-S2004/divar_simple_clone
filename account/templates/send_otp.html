@@ -1,0 +1,11 @@
+<form method="POST">
+
+    {% csrf_token %}
+
+    <input name="phone" id="phone" type="text" placeholder="... شماره تلفن خود را وارد کنید"/>
+    {% if message %}
+        {{ message }}
+    {% endif %}
+    <button type="submit">ارسال</button>
+
+</form>

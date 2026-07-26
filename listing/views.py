@@ -7,7 +7,6 @@ from .forms import ListingForm
 # Create your views here.
 def listing_page(request):
     listings =  Listing.objects.all()
-    
     return render(request, "list.html", {"listings":listings})
 
 
@@ -17,7 +16,6 @@ def listing_detail(request, id):
     images = ListingImage.objects.filter(listing=listing)
     
     return render(request, "detail.html", {"listing":listing, "images":images})
-
 
 
 def create_listing(request):

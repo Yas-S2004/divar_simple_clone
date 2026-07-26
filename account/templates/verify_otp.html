@@ -1,0 +1,97 @@
+<script
+    src="https://code.jquery.com/jquery-3.7.1.js"
+    integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+    crossorigin="anonymous">
+</script>
+
+<form method="post">
+    {% csrf_token %}
+
+    <input type="number" name="otp" placeholder="... کد تایید 6 رقمی را وارد کنید">
+
+    {% if message %}
+        {{ message }}
+    {% endif %}
+
+    <p>
+        زمان باقی مانده تا انقضای کد:
+        <span id="timer"></span>
+    </p>
+
+    <button type="submit">تایید</button>
+
+    <button
+        id="resend-btn"
+        type="button"
+        class="resend_btn"
+        data-codeRequest="code">
+        ارسال مجدد کد
+    </button>
+
+</form>
+
+<script>
+
+const timerElement = document.getElementById("timer");
+const resendButton = document.getElementById("resend-btn");
+let interval = null;
+
+function startTimer(seconds){
+    clearInterval(interval);
+    let remaining = seconds;
+    resendButton.disabled = true;
+    updateTimer();
+
+    interval = setInterval(function(){
+        remaining--;
+        updateTimer();
+
+        if(remaining <= 0){
+            clearInterval(interval);
+            timerElement.innerHTML = "کد منقضی شد";
+            resendButton.disabled = false;
+        }
+    },1000);
+
+    function updateTimer(){
+        let minutes = Math.floor(remaining / 60);
+        let secs = remaining % 60;
+        timerElement.innerHTML =
+            `${minutes}:${secs.toString().padStart(2,"0")}`;
+    }
+}
+
+const ttl = Number("{{ ttl|default:0 }}");
+
+if(ttl > 0){
+    startTimer(ttl);
+}else{
+    resendButton.disabled = false;
+    timerElement.innerHTML = "00:00";
+}
+
+
+
+$(document).on("click","#resend-btn",function(e){
+    e.preventDefault();
+    const btn = $(this);
+    btn.prop("disabled",true);
+    $.ajax({
+        type:"POST",
+        url:"{% url 'account:verify_otp' %}",
+        data:{
+            code_request:"code",
+            csrfmiddlewaretoken:"{{ csrf_token }}",
+            action:"post"
+        },
+        success:function(response){
+            startTimer(120);
+        },
+        error:function(){
+            btn.prop("disabled",false);
+            alert("ارسال کد با خطا مواجه شد.");
+        }
+    });
+});
+
+</script>
