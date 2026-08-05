@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+<h2>ویرایش آگهی</h2>
+
+
+{% for image in images %}
+<div class="image_box">
+    <img src="{{ image.image.url }}" width=200px height=200px/>
+    <button class="delete_image" data-index="{{image.id}}">حذف</button>
+</div>
+{% endfor %}
+
+
+{% include "includes/listing_form.html" %}
+
+
+<script>
+    console.log("OK");
+    let deletedImages = [];
+
+    $(document).on("click", ".delete_image", function (e) {
+        e.preventDefault();
+        console.log("OK");
+        const id = $(this).data("index");
+
+        deletedImages.push(id);
+
+        $(this).closest(".image_box").remove();
+        console.log(deletedImages)
+    });
+
+
+
+    $("form").on("submit", function () {
+        console.log(deletedImages)
+        $("#deleted_images").val(JSON.stringify(deletedImages));
+    });
+
+</script>

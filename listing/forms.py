@@ -5,6 +5,6 @@ from .models import Listing
 class ListingForm(forms.ModelForm):
     class Meta:
         model = Listing
-        fields = ("title", "description", "price")
+        fields = ("title", "description", "price", "category")
         
     
