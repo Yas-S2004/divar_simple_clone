@@ -1,11 +1,17 @@
-<form method="POST">
+{% extends "base.html" %}
 
-    {% csrf_token %}
+{% block content %}
 
-    <input name="phone" id="phone" type="text" placeholder="... شماره تلفن خود را وارد کنید"/>
-    {% if message %}
-        {{ message }}
-    {% endif %}
-    <button type="submit">ارسال</button>
+    <form method="POST">
 
-</form>
+        {% csrf_token %}
+
+        <input name="phone" id="phone" type="text" placeholder="... شماره تلفن خود را وارد کنید"/>
+        {% if message %}
+            {{ message }}
+        {% endif %}
+        <button type="submit">ارسال</button>
+
+    </form>
+
+{% endblock content %}

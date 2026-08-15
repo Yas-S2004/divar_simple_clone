@@ -1,18 +1,78 @@
-<html lang="fa" dir="rtl">
+{% extends "base.html" %}
 
 
-{% for image in images %}
+{% block content %}
 
-    <img src="{{ image.image.url }}" width="200px" height="200px"/>
 
-{% endfor %}
+    {% for image in images %}
 
-<hr><br>
+        <img src="{{ image.image.url }}" width="200px" height="200px"/>
 
-    {{ listing.title }}
-    <br><br>
-    {{ listing.description }}
+    {% endfor %}
 
-</html>
+    <hr><br>
+
+        {{ listing.title }}
+        <br><br>
+        {{ listing.description }}
+
+        {% if is_seller %}
+            <button>
+                <a href="{% url 'listing:update_listing' listing.id %}">ویرایش آگهی</a>
+            </button>
+            <form method="post" action="{% url 'listing:delete_listing' listing.id %}" 
+                style="display:inline;" onsubmit="return confirm('آیا از حذف این آگهی اطمینان دارید؟')">
+
+                {% csrf_token %}
+                <button class="btn btn-danger">حذف آگهی</button>
+            </form>
+        {% else %}
+            <button type="button" class="bookmark-btn" data-index="{{ listing.id }}" style="fontsize:22px;">
+                {% if is_bookmarked %}
+                    <i class="fa-solid fa-bookmark"></i>
+                {% else %}
+                    <i class="fa-regular fa-bookmark"></i>
+                {% endif %}
+            </button>
+        {% endif %}
+
+
+<script>
+    let deletedImages = [];
+
+    $(document).on("click", ".bookmark-btn", function (e) {
+        e.preventDefault();
+
+        const button = $(this);
+        const listing_id = button.data("index");
+
+        $.ajax({
+            url: "{% url 'listing:toggle_bookmark' listing.id %}",
+            type: "POST",
+            data: {
+                csrfmiddlewaretoken:"{{ csrf_token }}",
+            },
+            success: function(json){
+                const icon = button.find("i");
+
+                if(json.bookmarked){
+                    icon.removeClass("fa-regular").addClass("fa-solid");
+                }
+                else{
+                    icon.removeClass("fa-solid").addClass("fa-regular");
+                }
+            },
+            error: function(xhr, status, err){
+                console.log(err);
+            }
+
+        });
+
+    });
+
+
+</script>
+
+{% endblock content %}
 
 

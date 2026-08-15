@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
-
+from location.models import Province, City
 # Create your models here.
 class UserManager(BaseUserManager):
 
@@ -41,3 +41,25 @@ class User(AbstractUser):
     
     
     objects = UserManager()
+
+
+
+def avatar_image_path(instance, filename):
+    return f"profile/{instance.user.id}/{filename}"
+
+    
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    avatar = models.ImageField(upload_to=avatar_image_path, null=True, blank=True)
+    city = models.ForeignKey(City, on_delete=models.SET_NULL, related_name="profiles", null=True, blank=True)
+    
+
+    def __str__(self):
+        return self.user.username
+    
+
+
+    
+    
+    
+    

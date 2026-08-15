@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login
-from django.http import JsonResponse
-from .models import User
+from django.contrib.auth import login, logout
+from django.http import JsonResponse, HttpResponse
+from .models import User, Profile
+from .forms import EditProfileForm
+from listing.models import Listing, Bookmark
 from . import otp
 import re
 
@@ -14,7 +16,7 @@ def register_or_login(request, phone):
         user = User.objects.create_user(phone_number=phone)
         user.save()
     
-    
+
     
 def normalization_phone(phone):
     phone = phone.strip()
@@ -82,7 +84,71 @@ def verify_otp(request):
             message = "لطفا کد تایید را وارد کنید"
 
     return render(request, "verify_otp.html",{"message": message, "ttl": ttl})
+
     
+    
+def logout_user(request):
+    logout(request)
+    
+    return HttpResponse("شما با موفقیت از حساب کاربری خود خارج شدید") 
+    
+    
+    
+def user_profile(request):
+    profile = Profile.objects.get(user=request.user)
+    
+    return render(request, "user_profile.html", {"profile":profile})
+
+
+
+def edit_profile(request):
+    profile = request.user.profile
+    
+    data = {
+        "username":request.user.username,
+        "avatar":profile.avatar,
+        "city":(lambda city : city if city else None)(profile.city)}
+    
+    if request.method == "POST":
+        form = EditProfileForm(request.POST, request.FILES, user=request.user)
+        if form.is_valid():
+            cd = form.cleaned_data
+            
+            request.user.username = cd["username"]
+            request.user.save()
+            
+            profile.avatar = cd["avatar"]
+            profile.city = cd["city"]
+            profile.save()
+            
+            return redirect("/account/user/profile/")
+        
+    else:
+        form = EditProfileForm(initial=data)
+            
+    return render(request, "edit_profile.html", {"form":form})
+            
+
+
+def user_listings(request):
+    listings = Listing.objects.filter(seller=request.user)
+    
+    return render(request, "user_listings.html", {"listings":listings})
+
+
+
+def user_boomarks(request):
+    bookmarks = Bookmark.objects.filter(user=request.user).select_related("listing")
+    
+    return render(request, "user_bookmarks.html", {"bookmarks":bookmarks})
+
+
+
+    
+    
+    
+
+        
     
     
     

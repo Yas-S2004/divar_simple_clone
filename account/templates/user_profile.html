@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <img src="{{ profile.avatar.url }}" height="200px" width="200px"/>
+    <br>
+    نام کاربری :{{ profile.user.username }}
+    <br>
+    شهر :{{ profile.city }}
+    <br>
+    <a href="{% url 'account:user_listings' %}">آگهی های من</a>
+    <br>
+    <a href="{% url 'account:edit_profile' %}">ویرایش پروفایل<a>
+    <br>
+    <a href="{% url 'account:logout' %}">خروج از حساب کاربری</a>
+
+{% endblock content %}

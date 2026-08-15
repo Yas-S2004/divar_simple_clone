@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
-from .models import Listing, ListingImage
+from .models import Listing, ListingImage, Bookmark
 from django.db import transaction
 from .forms import ListingForm
 import json
@@ -34,13 +34,28 @@ def listing_detail(request, id):
     listing = Listing.objects.get(id=id)
     images = ListingImage.objects.filter(listing=listing)
     
-    return render(request, "detail.html", {"listing":listing, "images":images})
+    if listing.seller == request.user:
+        is_seller = True
+    else:
+        is_seller = False
+        
+    if Bookmark.objects.filter(user=request.user, listing=listing).exists():
+        is_bookmarked = True
+    else:
+        is_bookmarked = False        
+    
+    return render(request, "detail.html", {"listing":listing, "images":images, "is_seller":is_seller, "is_bookmarked":is_bookmarked})
 
 
 
 @login_required
 @transaction.atomic
 def create_listing(request):
+    if request.user.profile.city is None:
+        return redirect("/account/user/profile/edit/")
+    else:
+        city = request.user.profile.city
+        
     if request.method == "POST":
         form = ListingForm(request.POST)
         uploading_image_errors = []
@@ -67,14 +82,15 @@ def create_listing(request):
                 description=cd["description"],
                 price=cd["price"],
                 category=cd["category"],
-                seller=request.user)
+                seller=request.user,
+                city=city)
             
             
             for image in images:
                 ListingImage.objects.create(listing=listing, image=image)
 
                          
-            return redirect("/listings/")         
+            return redirect("/account/user/listings/")         
     else:
         form = ListingForm()
         return render(request, "create_listing.html", {"form":form})
@@ -87,18 +103,19 @@ def update_listing(request, id):
     listing = get_object_or_404(Listing, id=id, seller=request.user)
     images = ListingImage.objects.filter(listing=listing)
     updating_image_errors = []
-
+    context = {}
+    
     if request.method == "POST":
         deleted_image_ids = json.loads(request.POST.get("deleted_images"))
             
         form = ListingForm(request.POST, instance=listing)
         new_images = []
-
+        
         if form.is_valid():
             if request.FILES:
                 new_images = request.FILES.getlist("images")
                 images_count = images.count()
-                current_total =  images_count + len(new_images)
+                current_total =  images_count - len(deleted_image_ids) + len(new_images) 
                 
                 if current_total > 10:
                     updating_image_errors.append("تعداد تصاویر نباید بیشتر از 10 عدد باشد")
@@ -129,13 +146,13 @@ def update_listing(request, id):
             for image in new_images:
                 ListingImage.objects.create(listing=listing, image=image)
                                 
-            return redirect("/listings/")     
+            return redirect(f"/listings/{id}/")     
     else:
         form = ListingForm(instance=listing)
         
     context.pop("errors", None)
     context["images"] = images
-    
+
     return render(request, "update_listing.html", context)
      
   
@@ -154,3 +171,21 @@ def delete_listing(request, id):
         listing.delete()
         
     return HttpResponse("آگهی شما با موفقیت حذف شد")
+
+
+
+@login_required
+def toggle_bookmark(request, id):
+    listing = Listing.objects.get(id=id)
+    bookmark = Bookmark.objects.filter(listing=listing, user=request.user).first()
+        
+    if bookmark:
+        bookmark.delete()
+        bookmarked = False
+    else:
+        Bookmark.objects.create(user=request.user, listing=listing)
+        bookmarked=True
+        
+    return JsonResponse({"bookmarked":bookmarked})
+
+

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    {% if bookmarks %}
+
+        {% for bookmark in bookmarks %}
+
+            <li>
+
+                <a href="{% url 'listing:detail_page' bookmark.listing.id %}">{{ bookmark.listing.title }}</a>
+
+            </li>
+
+        {% endfor %}
+
+    {% else %}
+        
+        <center><h3>آگهی نشان شده ای وجود ندارد</h3></center>
+
+    {% endif %}
+
+{% endblock content %}
